@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blender AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #000 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .background::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Glass Panel Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: calc(100vh - 140px);
+            margin-top: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Messages Area */
+        .messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .message.user .message-bubble {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #fff;
+        }
+
+        .message.ai .message-bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #e5e7eb;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Progress Indicator */
+        .progress-message {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(236, 72, 153, 0.15);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 18px;
+            color: #fbbf24;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #ec4899 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Download Card */
+        .download-card {
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(16, 185, 129, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.75rem;
+        }
+
+        .download-btn:hover {
+            background: rgba(16, 185, 129, 1);
+            transform: translateY(-2px);
+        }
+
+        .quality-score {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+            color: #60a5fa;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #promptInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        #promptInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #ec4899 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-subtext {
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        /* Error State */
+        .error-message {
+            padding: 1rem 1.5rem;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 18px;
+            color: #fca5a5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                max-width: 100%;
+                height: calc(100vh - 100px);
+                border-radius: 0;
+                margin-top: 60px;
+            }
+
+            .nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <span class="logo-icon">🎨</span>
+            <span class="logo">Blender AI</span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="chat-container">
+            <!-- Messages Area -->
+            <div class="messages" id="messagesContainer">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">✨</div>
+                    <div class="empty-text">Blender AI</div>
+                    <div class="empty-subtext">Describe your simulation</div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        id="promptInput"
+                        placeholder="10 wooden blocks falling..."
+                        autocomplete="off"
+                    >
+                </div>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        const messagesContainer = document.getElementById('messagesContainer');
+        const emptyState = document.getElementById('emptyState');
+        const promptInput = document.getElementById('promptInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Handle Enter key
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendMessage();
+            }
+        });
+
+        function addMessage(text, type = 'user') {
+            // Hide empty state
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+
+            bubbleDiv.appendChild(textDiv);
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function addProgressMessage(step, progress = 0) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.id = 'progressMessage';
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'progress-message';
+            bubbleDiv.innerHTML = `
+                <div class="spinner"></div>
+                <div style="flex: 1;">
+                    <div class="message-text">${step}</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar" style="width: ${progress * 100}%"></div>
+                    </div>
+                </div>
+            `;
+
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function updateProgress(step, progress) {
+            const progressMsg = document.getElementById('progressMessage');
+            if (progressMsg) {
+                const textDiv = progressMsg.querySelector('.message-text');
+                const progressBar = document.getElementById('progressBar');
+                if (textDiv) textDiv.textContent = step;
+                if (progressBar) progressBar.style.width = `${progress * 100}%`;
+            }
+        }
+
+        function removeProgressMessage() {
+            const progressMsg = document.getElementById('progressMessage');
+            if (progressMsg) {
+                progressMsg.remove();
+            }
+        }
+
+        function addDownloadCard(result) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'download-card';
+
+            const qualityScore = result.quality_score ? result.quality_score.toFixed(2) : 'N/A';
+            const totalTime = result.total_time ? result.total_time.toFixed(1) : 'N/A';
+
+            cardDiv.innerHTML = `
+                <div class="message-text">
+                    ✅ Complete
+                    <span class="quality-score">Quality: ${qualityScore}</span>
+                </div>
+                <button class="download-btn" onclick="downloadResult()">
+                    ⬇️ Download .blend
+                </button>
+            `;
+
+            messageDiv.appendChild(cardDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addErrorMessage(error) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <div class="message-text">❌ ${error}</div>
+            `;
+
+            messageDiv.appendChild(errorDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const prompt = promptInput.value.trim();
+
+            if (!prompt) {
+                return;
+            }
+
+            // Add user message
+            addMessage(prompt, 'user');
+
+            // Clear input
+            promptInput.value = '';
+
+            // Disable send button
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Running...';
+
+            try {
+                // Start generation
+                const response = await fetch('http://localhost:8000/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        enable_refinement: true,
+                        max_refinement_iterations: 2
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to start generation');
+                }
+
+                const data = await response.json();
+                currentJobId = data.job_id;
+
+                // Add progress message
+                addProgressMessage('Starting...', 0);
+
+                // Connect to SSE stream for progress updates
+                connectToProgressStream(currentJobId);
+
+            } catch (error) {
+                console.error('Error:', error);
+                addErrorMessage('Failed to start: ' + error.message);
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        function connectToProgressStream(jobId) {
+            const eventSource = new EventSource(`http://localhost:8000/stream/${jobId}`);
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                if (data.status === 'done') {
+                    eventSource.close();
+                    return;
+                }
+
+                // Update progress
+                const progress = data.progress || 0;
+                const step = data.step || 'Processing...';
+
+                updateProgress(step, progress);
+
+                // Handle completion
+                if (data.status === 'completed' && data.result) {
+                    removeProgressMessage();
+                    addDownloadCard(data.result);
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                    eventSource.close();
+                } else if (data.status === 'failed') {
+                    removeProgressMessage();
+                    const errorMsg = data.errors ? data.errors.join(', ') : 'Generation failed';
+                    addErrorMessage(errorMsg);
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                    eventSource.close();
+                }
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('SSE Error:', error);
+                eventSource.close();
+                removeProgressMessage();
+                addErrorMessage('Connection error');
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            };
+        }
+
+        async function downloadResult() {
+            if (!currentJobId) return;
+
+            try {
+                const response = await fetch(`http://localhost:8000/download/${currentJobId}`);
+
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `simulation_${currentJobId}.blend`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                addErrorMessage('Download failed: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

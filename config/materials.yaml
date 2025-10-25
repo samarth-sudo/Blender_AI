@@ -1,0 +1,265 @@
+# Comprehensive Material Physics Database
+# All densities in kg/m³, friction and restitution are dimensionless (0-1)
+
+materials:
+  # Woods
+  wood_pine:
+    name: "Pine Wood"
+    density: 550
+    friction: 0.70
+    restitution: 0.15
+    linear_damping: 0.04
+    angular_damping: 0.10
+    collision_shape: "BOX"
+    collision_margin: 0.001
+
+  wood_oak:
+    name: "Oak Wood"
+    density: 750
+    friction: 0.75
+    restitution: 0.12
+    linear_damping: 0.04
+    angular_damping: 0.10
+    collision_shape: "BOX"
+    collision_margin: 0.001
+
+  wood_balsa:
+    name: "Balsa Wood"
+    density: 150
+    friction: 0.65
+    restitution: 0.20
+    linear_damping: 0.05
+    angular_damping: 0.12
+    collision_shape: "BOX"
+    collision_margin: 0.001
+
+  # Metals
+  metal_steel:
+    name: "Steel"
+    density: 7850
+    friction: 0.35
+    restitution: 0.40
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "MESH"
+    collision_margin: 0.0005
+
+  metal_aluminum:
+    name: "Aluminum"
+    density: 2700
+    friction: 0.30
+    restitution: 0.45
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "MESH"
+    collision_margin: 0.0005
+
+  metal_copper:
+    name: "Copper"
+    density: 8960
+    friction: 0.32
+    restitution: 0.35
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "MESH"
+    collision_margin: 0.0005
+
+  metal_iron:
+    name: "Iron"
+    density: 7874
+    friction: 0.40
+    restitution: 0.30
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "MESH"
+    collision_margin: 0.0005
+
+  # Plastics & Rubber
+  rubber:
+    name: "Rubber"
+    density: 1200
+    friction: 0.90
+    restitution: 0.85
+    linear_damping: 0.08
+    angular_damping: 0.15
+    collision_shape: "CONVEX_HULL"
+    collision_margin: 0.002
+
+  plastic_hard:
+    name: "Hard Plastic"
+    density: 1100
+    friction: 0.40
+    restitution: 0.60
+    linear_damping: 0.03
+    angular_damping: 0.05
+    collision_shape: "CONVEX_HULL"
+    collision_margin: 0.001
+
+  plastic_soft:
+    name: "Soft Plastic"
+    density: 950
+    friction: 0.50
+    restitution: 0.50
+    linear_damping: 0.05
+    angular_damping: 0.08
+    collision_shape: "CONVEX_HULL"
+    collision_margin: 0.002
+
+  # Glass & Ceramics
+  glass:
+    name: "Glass"
+    density: 2500
+    friction: 0.20
+    restitution: 0.65
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "MESH"
+    collision_margin: 0.0005
+
+  ceramic:
+    name: "Ceramic"
+    density: 2400
+    friction: 0.35
+    restitution: 0.30
+    linear_damping: 0.02
+    angular_damping: 0.03
+    collision_shape: "MESH"
+    collision_margin: 0.001
+
+  # Stone & Concrete
+  stone_granite:
+    name: "Granite"
+    density: 2750
+    friction: 0.60
+    restitution: 0.20
+    linear_damping: 0.02
+    angular_damping: 0.03
+    collision_shape: "MESH"
+    collision_margin: 0.001
+
+  stone_marble:
+    name: "Marble"
+    density: 2650
+    friction: 0.55
+    restitution: 0.25
+    linear_damping: 0.02
+    angular_damping: 0.03
+    collision_shape: "MESH"
+    collision_margin: 0.001
+
+  concrete:
+    name: "Concrete"
+    density: 2400
+    friction: 0.65
+    restitution: 0.15
+    linear_damping: 0.03
+    angular_damping: 0.04
+    collision_shape: "BOX"
+    collision_margin: 0.001
+
+  # Fabrics (for cloth simulations)
+  fabric_cotton:
+    name: "Cotton Fabric"
+    density: 1550
+    mass_per_m2: 0.300  # kg/m² (weight of fabric)
+    friction: 0.70
+    air_damping: 0.5
+    tension_stiffness: 15
+    compression_stiffness: 15
+    shear_stiffness: 5
+    bending_stiffness: 0.5
+
+  fabric_silk:
+    name: "Silk Fabric"
+    density: 1350
+    mass_per_m2: 0.080
+    friction: 0.50
+    air_damping: 0.3
+    tension_stiffness: 10
+    compression_stiffness: 10
+    shear_stiffness: 3
+    bending_stiffness: 0.2
+
+  fabric_leather:
+    name: "Leather"
+    density: 850
+    mass_per_m2: 0.900
+    friction: 0.80
+    air_damping: 0.6
+    tension_stiffness: 80
+    compression_stiffness: 80
+    shear_stiffness: 40
+    bending_stiffness: 5.0
+
+  # Special Materials
+  foam:
+    name: "Foam"
+    density: 50
+    friction: 0.60
+    restitution: 0.30
+    linear_damping: 0.15
+    angular_damping: 0.20
+    collision_shape: "CONVEX_HULL"
+    collision_margin: 0.005
+
+  paper:
+    name: "Paper"
+    density: 700
+    friction: 0.60
+    restitution: 0.10
+    linear_damping: 0.10
+    angular_damping: 0.15
+    collision_shape: "BOX"
+    collision_margin: 0.001
+
+  ice:
+    name: "Ice"
+    density: 917
+    friction: 0.10
+    restitution: 0.50
+    linear_damping: 0.01
+    angular_damping: 0.02
+    collision_shape: "CONVEX_HULL"
+    collision_margin: 0.001
+
+# Fluid Properties (for fluid simulations)
+fluids:
+  water:
+    name: "Water"
+    viscosity: 1.0
+    diffusion: 0.001
+
+  oil:
+    name: "Oil"
+    viscosity: 5.0
+    diffusion: 0.0005
+
+  honey:
+    name: "Honey"
+    viscosity: 20.0
+    diffusion: 0.0001
+
+  smoke:
+    name: "Smoke"
+    density_factor: 1.0
+    temperature_diff: 1.0
+    vorticity: 0.1
+
+  fire:
+    name: "Fire"
+    density_factor: 0.1
+    temperature_diff: 2.0
+    vorticity: 0.5
+    flame_rate: 1.5
+    smoke_rate: 1.0
+
+# Default fallback material
+default:
+  name: "Default Material"
+  density: 1000
+  friction: 0.50
+  restitution: 0.40
+  linear_damping: 0.04
+  angular_damping: 0.10
+  collision_shape: "CONVEX_HULL"
+  collision_margin: 0.001

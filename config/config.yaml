@@ -1,0 +1,91 @@
+# Blender AI Simulation Generator Configuration
+
+# Claude API Settings
+llm:
+  provider: "anthropic"
+  model: "claude-sonnet-4-5-20250929"
+  max_tokens: 4096
+  temperature: 0.2
+  timeout_seconds: 60
+
+# Blender Execution Settings
+blender:
+  executable: "blender"
+  timeout_seconds: 300
+  background_mode: true
+  enable_gpu: false
+  render_engine: "CYCLES"
+
+# Agent Configuration
+agents:
+  max_retries: 3
+  retry_delay_seconds: 2
+  enable_parallel_execution: false
+
+  planner:
+    max_tokens: 2000
+    temperature: 0.1
+
+  code_generator:
+    max_tokens: 4000
+    temperature: 0.2
+    use_templates: true
+
+  quality_validator:
+    min_quality_score: 0.8
+    strict_mode: false
+
+# Simulation Defaults
+simulations:
+  rigid_body:
+    default_frames: 250
+    substeps_per_frame: 10
+    solver_iterations: 10
+    gravity: -9.81
+
+  fluid:
+    default_frames: 150
+    resolution_max: 128
+    time_scale: 1.0
+
+  cloth:
+    default_frames: 200
+    quality_steps: 5
+    time_scale: 1.0
+
+# Quality Validation Thresholds
+quality:
+  min_object_count: 1
+  max_interpenetration_depth: 0.005  # meters
+  min_lighting_intensity: 100  # watts
+  require_camera: true
+  require_physics: true
+
+# Error Handling
+errors:
+  enable_auto_retry: true
+  max_retry_attempts: 2
+  retry_on_types:
+    - "syntax_error"
+    - "api_error"
+    - "physics_error"
+
+  recovery_strategies:
+    syntax_error: "regenerate_with_feedback"
+    api_error: "use_fallback_params"
+    physics_error: "reduce_complexity"
+
+# Output Settings
+output:
+  save_intermediate_files: true
+  generate_preview_images: true
+  preview_resolution: [640, 480]
+  compression_level: 0  # 0=none, 1-9=increasing
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/blender_ai.log"
+  console_output: true
+  save_blender_logs: true
