@@ -227,7 +227,8 @@ if sim_type == "rigid_body":
 
     if result["has_rigidbody_world"]:
         rbw = bpy.context.scene.rigidbody_world
-        result["gravity"] = list(rbw.gravity)
+        # In Blender 4.5+, gravity is on scene, not rigidbody_world
+        result["gravity"] = list(bpy.context.scene.gravity)
         result["substeps"] = rbw.substeps_per_frame
 
     # Count rigid body objects

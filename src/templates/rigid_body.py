@@ -135,6 +135,7 @@ def get_bake_simulation() -> str:
 def bake_rigid_body_simulation():
     """
     Bake (pre-calculate) the rigid body simulation.
+    Compatible with Blender 4.5+ and earlier versions.
 
     Baking runs the physics simulation for all frames and caches the results.
     This is necessary before you can render or save the animation.
@@ -153,13 +154,20 @@ def bake_rigid_body_simulation():
     print(f"Baking rigid body simulation: frames {start_frame}-{end_frame}")
     print("This may take a while for complex scenes...")
 
-    # Bake the simulation
-    # Override context to ensure baking works in background mode
-    override = bpy.context.copy()
-    override['point_cache'] = scene.rigidbody_world.point_cache
-
-    # Perform the bake
-    bpy.ops.ptcache.bake(override, bake=True)
+    # Bake the simulation with version-aware context override
+    # Blender 4.5+ changed the context override API
+    if bpy.app.version >= (4, 5, 0):
+        # Use temp_override context manager for Blender 4.5+
+        with bpy.context.temp_override(
+            scene=scene,
+            point_cache=scene.rigidbody_world.point_cache
+        ):
+            bpy.ops.ptcache.bake_all(bake=True)
+    else:
+        # Legacy API for Blender < 4.5
+        override = bpy.context.copy()
+        override['point_cache'] = scene.rigidbody_world.point_cache
+        bpy.ops.ptcache.bake(override, bake=True)
 
     print("Simulation baked successfully")
 '''
